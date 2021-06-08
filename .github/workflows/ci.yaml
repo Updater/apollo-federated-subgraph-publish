@@ -1,0 +1,59 @@
+name: ci
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  IMAGE_NAME: apollo-federated-subgraph-publish
+
+jobs:
+  build:
+    name: runner / build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Define version and build timestamp
+        run: |
+          echo "VERSION=$(date -u +'%Y%m%d')-$GITHUB_RUN_NUMBER-${GITHUB_SHA:0:7}" >> $GITHUB_ENV
+          echo "BUILD_TIMESTAMP=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
+
+      - name: Build image
+        run: docker build . --file Dockerfile --build-arg version=$VERSION --build-arg build-timestamp=$BUILD_TIMESTAMP --tag $IMAGE_NAME
+
+      - name: Log into registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+      - name: Push image
+        run: |
+          IMAGE_ID=$(echo docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME | tr '[A-Z]' '[a-z]')
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+
+  lint:
+    name: runner / lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: commitlint
+        uses: Updater/action-commitlint@master
+        with:
+          firstParent: true
+
+      - name: hadolint
+        uses: Updater/action-hadolint@master
+        with:
+          exclude: "./.git/*"
+
+      - name: markdownlint
+        uses: Updater/action-markdownlint@master
+
+      - name: shellcheck
+        uses: Updater/action-shellcheck@master
+        with:
+          exclude: "./.git/*"
