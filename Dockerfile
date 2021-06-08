@@ -17,6 +17,9 @@ RUN wget -q https://github.com/apollographql/rover/releases/download/${ROVER_VER
  && rm $ROVER_TARBALL \
  && chmod 755 ./rover
 
+# Ensure we are applying security patches, etc.
+RUN apk -U upgrade
+
 ARG BUILD_TIMESTAMP
 ARG VERSION
 ENV BUILD_TIMESTAMP=$BUILD_TIMESTAMP VERSION=$VERSION
