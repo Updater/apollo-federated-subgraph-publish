@@ -1,0 +1,17 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: apollo-federated-subgraph-publish
+  description: An image that can publish a federated subgraph to Apollo Studio
+  annotations:
+    backstage.io/techdocs-ref: url:http://github.com/Updater/apollo-federated-subgraph-publish/tree/main
+    github.com/project-slug: Updater/apollo-federated-subgraph-publish
+  tags:
+    - graphql
+    - apollo
+    - schema-federation
+spec:
+  type: job
+  lifecycle: production
+  owner: devops-team
+  system: unified-graphql-api
