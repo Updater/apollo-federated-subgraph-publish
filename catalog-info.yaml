@@ -13,5 +13,5 @@ metadata:
 spec:
   type: job
   lifecycle: production
-  owner: devops-team
+  owner: devops
   system: unified-graphql-api
